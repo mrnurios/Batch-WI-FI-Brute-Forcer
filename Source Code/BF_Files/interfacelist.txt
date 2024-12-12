@@ -1,0 +1,2 @@
+1 - Intel(R) WiFi - 00:21:5d:2d:f2:09
+2 - Cancel Selection

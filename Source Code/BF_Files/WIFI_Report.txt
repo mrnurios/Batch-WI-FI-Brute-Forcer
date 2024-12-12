@@ -1,7 +1,7 @@
 [------------------------------------]
  WIFI Brute Force Results
 [------------------------------------]
- SSID: TheBATeam
- Password: 123456789a
- Attemps: 4
+ SSID: 5G-AMS WIFI
+ Password: password
+ Attemps: 1
 [------------------------------------]

@@ -20,11 +20,11 @@ setlocal enabledelayedexpansion
 	set /a choice_code=0
 	
 	
-	set char_list=abcdefghijklmnoprstuvyzxwq 
+	set char_list=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 		
 	set digit_list=1234567890
 
-	set symbol_list=-_
+	set symbol_list=`~/=\!@#$%^&*()[]{}<>;:'.,-_
 	
 	goto :main
 	
@@ -69,47 +69,41 @@ setlocal enabledelayedexpansion
 	
 	
 	if !choice_code!==1 (
-	set /a char_code=!random! %% 26
+	set /a char_code=!random! %% 52
 	call :select_char !char_code!
 	)
-		if !choice_code!==2 (
-	set /a char_code=!random! %% 26
+	if !choice_code!==2 (
+	set /a char_code=!random! %% 52
 	call :select_char !char_code!
 	)
-		if !choice_code!==3 (
-	set /a char_code=!random! %% 26
+	if !choice_code!==3 (
+	set /a char_code=!random! %% 52
 	call :select_char !char_code!
 	)
-		if !choice_code!==4 (
-	set /a char_code=!random! %% 26
+	if !choice_code!==4 (
+	set /a char_code=!random! %% 52
 	call :select_char !char_code!
 	)
-		if !choice_code!==5 (
-	set /a char_code=!random! %% 26
+	if !choice_code!==5 (
+	set /a char_code=!random! %% 52
 	call :select_char !char_code!
 	)
-		if !choice_code!==6 (
-	set /a char_code=!random! %% 26
+	if !choice_code!==6 (
+	set /a char_code=!random! %% 52
 	call :select_char !char_code!
 	)
-	
 	if !choice_code!==7 (
 	set /a digit_code=!random! %% 10
 	call :select_digit !digit_code!
 	)
-		if !choice_code!==8 (
+	if !choice_code!==8 (
 	set /a digit_code=!random! %% 10
 	call :select_digit !digit_code!
 	)
-
-
-	
-	
 	if !choice_code!==9 (
-	set /a symbol_code=!random! %% 2
+	set /a symbol_code=!random! %% 28
 	call :select_symbol !symbol_code!
 	)
-	
 	if !choice_code!==10 (
 	set add_current_thing=true
 	)
@@ -123,44 +117,43 @@ setlocal enabledelayedexpansion
 	
 	
 	:main
-	echo.
-	echo  [==================================================]
-	call colorchar.exe /0b "                Key Combinator 1.0.0"
-	echo.
-	echo  [==================================================]
-	call colorchar.exe /0e "                  Developed By TUX"
-	echo.
-	echo  [==================================================]
-	echo.
-	echo  What is the limit length for creating passwords? (8-?)
-	call :userinput
-	set /p until_where=
-	
-	if !until_where! lss 8 (
 		echo.
-		call colorchar.exe /0c " Bad input..."
-		timeout /t 3 >nul
+		echo  [==================================================]
+		call colorchar.exe /0b "                Key Combinator 1.0.0"
+		echo.
+		echo  [==================================================]
+		call colorchar.exe /0e "                  Developed By TUX"
+		echo.
+		echo  [==================================================]
+		echo.
+		echo  What is the limit length for creating passwords? (8-?)
+		call :userinput
+		set /p until_where=
+		
+		if !until_where! lss 8 (
+			echo.
+			call colorchar.exe /0c " Bad input..."
+			timeout /t 3 >nul
+			cls
+			set until_where=
+			goto :main
+		)
+	
+		echo.
+		echo  How many passwords will generated per length?
+		call :userinput
+		set /p how_many_passwords_per_length=
 		cls
-		set until_where=
-		goto :main
-	)
-	
-	
-	echo.
-	echo  How many passwords will generated per length?
-	call :userinput
-	set /p how_many_passwords_per_length=
-	cls
-	
-	
+		
+		
 
-	
-	
-	
-	
-	
-	
-	echo  Generating Passwords...
+		
+		
+		
+		
+		
+		
+		echo  Generating Passwords...
 	
 	
 	
@@ -176,22 +169,21 @@ setlocal enabledelayedexpansion
 		
 					for /l %%a in ( 1,1, !current_pass_length!) do (
 		
-				
 						if !add_current_thing!==true (
-						set master_password=!master_password!!current_add!
-						set add_current_thing=false
+							set master_password=!master_password!!current_add!
+							set add_current_thing=false
 						)else (
-						call :select_choice
-						set master_password=!master_password!!current_add!
+							call :select_choice
+							set master_password=!master_password!!current_add!
 						)
 					
 		
 						if %%a==!current_pass_length! (
-						set /a passwords_generated=!passwords_generated!+1
-						echo !master_password!>>passlist_raw.txt
-						set master_password=
+							set /a passwords_generated=!passwords_generated!+1
+							echo !master_password!>>passlist_raw.txt
+							set master_password=
 						)
-				
+
 
 					)
 						cls
