@@ -7,7 +7,6 @@ password
 1234567890
 1qaz2wsx
 abcd1234
-Bongcayao_2024
 11111111
 987654321
 asdf1234
